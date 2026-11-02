@@ -1,5 +1,13 @@
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy import URL
+
+
+class S3Settings(BaseModel):
+    access_key: str = "minioadmin"
+    secret_key: str = "minioadmin"
+    endpoint_url: str = "localhost"
+    bucket_name: str = ""
 
 
 class DBSettings(BaseModel):
@@ -8,6 +16,11 @@ class DBSettings(BaseModel):
     user: str = "user"
     password: str = "password"
     name: str = "meta_info"
+    drivername: str = ""
+    database: str = ""
+
+    def get_url(self):
+        return URL.create(drivername=self.drivername, database=self.name)
 
 
 class AppSettings(BaseModel):
@@ -25,7 +38,13 @@ class Settings(BaseSettings):
     )
     app: AppSettings = AppSettings()
     db: DBSettings = DBSettings()
+    s3: S3Settings = S3Settings()
 
 
 settings = Settings()
 print(settings.db.name, settings.db.password)
+print(settings.app.name)
+print(settings.app.port)
+print(settings.db.get_url())
+print(settings.s3.access_key)
+print(settings.s3.bucket_name)
